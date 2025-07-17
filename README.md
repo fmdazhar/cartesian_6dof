@@ -37,7 +37,7 @@ The MuJoCo assets reside in `examples/universal_robots_ur5e/`.
 ## 🚀 Quick Start
 
 ```bash
-$ cd mink
+$ cd cartesian_6dof
 $ pip install -e .
 
 # 4 Run a demo (a window will pop‑up)
