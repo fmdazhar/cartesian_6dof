@@ -10,7 +10,7 @@ It extends the open‑source **[Mink](https://github.com/kevinzakka/mink)** robo
 | Area                    | What was implemented                                                                     |
 | ----------------------- | ---------------------------------------------------------------------------------------- |
 | **Robot model**         | UR5e + Robotiq 2F‑85 gripper added to the original Mink XML assets.                      |
-| **Cartesian Motion**    | Quintic polynomial interpolator for smooth end‑effector paths.                           |
+| **Cartesian Motion**    | Polynomial trajectory interpolator (orders 1/3/5) with optional endpoint velocity/acceleration; default quintic is C²-continuous. |
 | **Tele‑operation**      | Re‑worked `TeleopMocap` with gripper open/close and active tracking shortcuts.           |
 | **Collision avoidance** | Explicit geom pairs (gripper ↔ wall block) enforced via `CollisionAvoidanceLimit`.       |
 | **Pick & place**        | Scripted waypoint planner that grasps a cube, transports it and releases it at a target. |
@@ -25,7 +25,7 @@ Below are ready‑to‑run demo scripts **and** short screen‑capture clips so 
 | ----------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | `examples/arm_ur5e_actuators.py`          | Tele‑op of the bare UR5e arm (no gripper).              | <video src="media/s_arm.mp4" controls loop muted width="320"></video>        |
 | `examples/arm_ur5e_gripper.py`            | Tele‑op of UR5e + Robotiq gripper.                      | <video src="media/s_gripper.mp4" controls loop muted width="320"></video>    |
-| `examples/arm_ur5e_gripper_collision.py`  | Tele‑op with a wall obstacle and collision constraints. | <video src="media/s_collision.mp4" controls loop muted width="320"></video>  |
+| `examples/arm_ur5e_gripper_collision.py`  | Tele‑op with a obstacle and collision constraints(with obstacle and floor). | <video src="media/s_collision.mp4" controls loop muted width="320"></video>  |
 | `examples/arm_ur5e_gripper_pick_place.py` | Fully autonomous pick‑and‑place routine.                | <video src="media/s_pick_place.mp4" controls loop muted width="320"></video> |
 
 > **Tip 🔍** If the inline video preview does not play on GitHub, simply click it to download or open it externally.
@@ -51,21 +51,25 @@ $ python3 examples/arm_ur5e_gripper_pick_place.py # autonomous
 
 ## Key Mappings
 
-| Key            | Action                                                             |
-| -------------- | ------------------------------------------------------------------ |
-| `9`            | Toggle teleoperation On/Off.                                       |
-| `n`            | Toggle between manual and non-manual mode.                         |
-| `.`            | Toggle between rotation and translation mode.                      |
-| `8`            | Cycle through different mocap data.                                |
-| `+`            | Increase movement step size or movement speed.                     |
-| `-`            | Decrease movement step size or movement speed.                     |
-| **Arrow Keys** | **Move (rotation / translation) along the X, Y, and Z axes**       |
-| `Up`           | Move forward (+X) or rotates around X-axis in positive direction.  |
-| `Down`         | Move backward (-X) or rotates around X-axis in negative direction. |
-| `Right`        | Move right (+Y) or rotates around Y-axis in positive direction.    |
-| `Left`         | Move left (-Y) or rotates around Y-axis in negative direction.     |
-| `7`            | Move up (+Z) or rotates around Z-axis in positive direction.       |
-| `6`            | Move down (-Z) or rotates around Z-axis in negative direction.     |
+| Key              | Action                                                                 |
+| ---------------- | ---------------------------------------------------------------------- |
+| `9`              | Toggle teleoperation On/Off.                                           |
+| `n`              | Toggle between manual and non-manual mode.                             |
+| `.`              | Toggle between rotation and translation mode.                          |
+| `8`              | Cycle through mocap bodies (mocap index).                              |
+| `=` / `+`        | Increase step size (translation) or rotation step (shows value).       |
+| `-`              | Decrease step size (translation) or rotation step (shows value).       |
+| `\`              | Toggle **mocap tracking** On/Off (follow target).                      |
+| `O`              | **Open** gripper fully.                                                |
+| `P`              | **Close** gripper fully.                                               |
+| `G`              | Request a **new goal** (one-shot flag consumed by main loop).          |
+| **Arrow Keys**   | **Move / rotate** along X, Y, Z depending on mode (see below).         |
+| `Up`             | +X translation or +X rotation.                                         |
+| `Down`           | −X translation or −X rotation.                                         |
+| `Right`          | +Y translation or +Y rotation.                                         |
+| `Left`           | −Y translation or −Y rotation.                                         |
+| `7`              | +Z translation or +Z rotation.                                         |
+| `6`              | −Z translation or −Z rotation.  
 
 ### Modes
 
@@ -105,7 +109,11 @@ The QP is assembled in `build_ik()` (see `mink.inverse_kinematics`). Any backend
 
 ### Polynomial Time‑Scaling of Cartesian Way‑points
 
-A short sequence of **SE(3) way‑points** is lifted to a smooth, fully‑parameterised trajectory using a scalar blend function $s(\tau)$ with normalised time $\tau\in[0,1]$. Three closed‑form splines are provided by `PolynomialInterpolator`:
+A short sequence of **SE(3) way-points** is lifted to a smooth, fully-parameterised trajectory using a scalar blend function $s(\tau)$ with normalised time $\tau\in[0,1]$.
+It supports **endpoint derivatives**:
+first-derivative $s'(0)=s1_0$, $s'(1)=s1_1$ and second-derivative $s''(0)=s2_0$, $s''(1)=s2_1$.  
+By default all derivatives are zero, recovering the classical minimum-jerk-like quintic timing.
+ 
 
 | Order | Continuity | Blend function $s(\tau)$                  |
 | :---: | :--------: | :---------------------------------------- |
@@ -113,8 +121,9 @@ A short sequence of **SE(3) way‑points** is lifted to a smooth, fully‑parame
 |   3   |   $C^1$  | $s(\tau)=3\tau^{2}-2\tau^{3}$             |
 |   5   |   $C^2$  | $s(\tau)=6\tau^{5}-15\tau^{4}+10\tau^{3}$ |
 
-These polynomials guarantee **zero** velocity (and acceleration for the quintic case) at both the start and the goal, greatly reducing jerk at grasp‑ and release‑events.
-
+Setting non-zero $(s1_\cdot, s2_\cdot)$ enables **non-rest-to-rest** transitions (e.g., blend segments without stopping),
+while the default $(0,0,0,0)$ guarantees **zero** velocity (and acceleration for the quintic case) at both ends—ideal for grasp/release events.
+ 
 Given two poses $T_0, T_1\in\mathrm{SE}(3)$ the time‑parametrised pose is
 
 ```math
@@ -151,7 +160,7 @@ The UR5e arm links are also listed under `_arm_collision_geom_names` for future 
 ## 🤖 Pick & Place Pipeline
 
 ```
-           ┌──────────────┐    1  quintic interpolation (200 steps)
+           ┌──────────────┐    1  quintic interpolation (200 steps(default))
 start pose │ current EE T │ ─────────────────────────────────────► goal queue
            └──────────────┘
                       ▲                │
@@ -159,7 +168,7 @@ start pose │ current EE T │ ────────────────
              IK (QP‑LM‑damped)    Mujoco step + gripper cmd
 ```
 
-1. **Way‑points:** hard‑coded positions/orientations (approach, descend, lift, place).
+1. **Way‑points:** hard‑coded positions/orientations (approach, descend, lift, place). The grasp is face-down about world Y (`quat = [0, 1, 0, 0]` in **w xyz** ordering), targeting the `pinch` site between the Robotiq fingers (parallel-jaw “top grasp”).
 2. **Interpolator:** `PolynomialInterpolator(order=5)` yields a C²‑continuous Cartesian path.
 3. **Solver:** At 200 Hz the IK QP returns joint velocities that respect
 

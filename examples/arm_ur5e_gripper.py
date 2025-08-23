@@ -68,7 +68,7 @@ if __name__ == "__main__":
     path_idx: int = 0
 
     # Polynomial trajectory generator
-    interpolator = mink.PolynomialInterpolator(order=5)
+    interpolator = mink.PolynomialInterpolator(order=5, s1_0=0.0, s1_1=0.0, s2_0=0.0, s2_1=0.0)
 
     # Initialize key_callback function.
     key_callback = TeleopMocap(data)
