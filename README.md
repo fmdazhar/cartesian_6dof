@@ -21,12 +21,13 @@ It extends the open‑source **[Mink](https://github.com/kevinzakka/mink)** robo
 
 Below are ready‑to‑run demo scripts **and** short screen‑capture clips so you can preview what each example does before running it locally.
 
-| Script                                    | Description                                             | Preview                                                                      |
-| ----------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `examples/arm_ur5e_actuators.py`          | Tele‑op of the bare UR5e arm (no gripper).              | <video src="media/s_arm.mp4" controls loop muted width="320"></video>        |
-| `examples/arm_ur5e_gripper.py`            | Tele‑op of UR5e + Robotiq gripper.                      | <video src="media/s_gripper.mp4" controls loop muted width="320"></video>    |
-| `examples/arm_ur5e_gripper_collision.py`  | Tele‑op with a obstacle and collision constraints(with obstacle and floor). | <video src="media/s_collision.mp4" controls loop muted width="320"></video>  |
-| `examples/arm_ur5e_gripper_pick_place.py` | Fully autonomous pick‑and‑place routine.                | <video src="media/s_pick_place.mp4" controls loop muted width="320"></video> |
+| Script                                    | Description                                             | Preview                          |
+| ----------------------------------------- | ------------------------------------------------------- | -------------------------------- |
+| `examples/arm_ur5e_actuators.py`          | Tele-op of the bare UR5e arm (no gripper).              | ![](media/s_arm.gif)             |
+| `examples/arm_ur5e_gripper.py`            | Tele-op of UR5e + Robotiq gripper.                      | ![](media/s_gripper.gif)         |
+| `examples/arm_ur5e_gripper_collision.py`  | Tele-op with a obstacle and collision constraints.      | ![](media/s_collision.gif)       |
+| `examples/arm_ur5e_gripper_pick_place.py` | Fully autonomous pick-and-place routine.                | ![](media/s_pick_place.gif)      |
+
 
 > **Tip 🔍** If the inline video preview does not play on GitHub, simply click it to download or open it externally.
 
@@ -151,7 +152,7 @@ limits = [
 
 The UR5e arm links are also listed under `_arm_collision_geom_names` for future extension (e.g. self–collision).
 
-<video src="media/s_collision_viz.mp4" controls loop muted width="480"></video>
++![](media/s_collision_viz.gif)
 
 > **Yellow debug lines?**  In the clip below, the **yellow lines** are real‑time debug visuals drawn by Mink's collision monitor.  Each line starts at the centre of a monitored gripper/arm geom and ends at the closest point on the `wall` geom.  Its length equals the current signed‑distance, so it shrinks to zero exactly at contact.  This provides an immediate, intuitive view of which constraints are active and how close every geom is to collision.
 
@@ -176,7 +177,7 @@ start pose │ current EE T │ ────────────────
    * velocity limits (`VelocityLimit`)
    * and the collision constraint above if scene demands.
 
-<video src="media/s_interpolation.mp4" controls loop muted width="480"></video>
++![](media/s_interpolation.gif)
 
 The pick‑and‑place demo is fully scripted—no input needed.
 
