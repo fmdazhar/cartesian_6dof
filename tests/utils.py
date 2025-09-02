@@ -1,7 +1,7 @@
 import numpy as np
 
-from mink.lie import SE3, SO3
-from mink.lie.base import MatrixLieGroup
+from cartesian_6dof.lie import SE3, SO3
+from cartesian_6dof.lie.base import MatrixLieGroup
 
 
 def assert_transforms_close(a: MatrixLieGroup, b: MatrixLieGroup) -> None:

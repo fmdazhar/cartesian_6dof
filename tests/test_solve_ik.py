@@ -5,7 +5,7 @@ from absl.testing import absltest
 from numpy.linalg import norm
 from robot_descriptions.loaders.mujoco import load_robot_description
 
-import mink
+import cartesian_6dof
 
 
 class TestSolveIK(absltest.TestCase):
@@ -16,7 +16,7 @@ class TestSolveIK(absltest.TestCase):
         cls.model = load_robot_description("ur5e_mj_description")
 
     def setUp(self):
-        self.configuration = mink.Configuration(self.model)
+        self.configuration = cartesian_6dof.Configuration(self.model)
         velocities = {
             "shoulder_pan_joint": np.pi,
             "shoulder_lift_joint": np.pi,
@@ -26,8 +26,8 @@ class TestSolveIK(absltest.TestCase):
             "wrist_3_joint": np.pi,
         }
         self.limits = [
-            mink.ConfigurationLimit(self.model),
-            mink.VelocityLimit(self.model, velocities),
+            cartesian_6dof.ConfigurationLimit(self.model),
+            cartesian_6dof.VelocityLimit(self.model, velocities),
         ]
 
     def test_exceeding_limits_with_safety_break_throws(self):
@@ -35,8 +35,8 @@ class TestSolveIK(absltest.TestCase):
         q = self.model.key("home").qpos.copy()
         q[0] = self.model.jnt_range[0, 1] + 0.1
         self.configuration.update(q)
-        with self.assertRaises(mink.NotWithinConfigurationLimits):
-            mink.solve_ik(
+        with self.assertRaises(cartesian_6dof.NotWithinConfigurationLimits):
+            cartesian_6dof.solve_ik(
                 self.configuration,
                 [],
                 limits=self.limits,
@@ -50,7 +50,7 @@ class TestSolveIK(absltest.TestCase):
         q = self.model.key("home").qpos.copy()
         q[0] = self.model.jnt_range[0, 1] + 0.1
         self.configuration.update(q)
-        mink.solve_ik(
+        cartesian_6dof.solve_ik(
             self.configuration,
             [],
             limits=self.limits,
@@ -61,24 +61,24 @@ class TestSolveIK(absltest.TestCase):
 
     def test_model_with_no_limits(self):
         """Model with no limits has no inequality constraints."""
-        problem = mink.build_ik(self.configuration, [], limits=[], dt=1.0)
+        problem = cartesian_6dof.build_ik(self.configuration, [], limits=[], dt=1.0)
         self.assertIsNone(problem.G)
         self.assertIsNone(problem.h)
 
     def test_default_limits(self):
         """If no limits are provided, configuration limits are set."""
-        problem = mink.build_ik(self.configuration, [], dt=1.0)
+        problem = cartesian_6dof.build_ik(self.configuration, [], dt=1.0)
         self.assertIsNotNone(problem.G)
         self.assertIsNotNone(problem.h)
 
     def test_trivial_solution(self):
         """No task returns no velocity."""
-        v = mink.solve_ik(self.configuration, [], limits=[], dt=1e-3, solver="daqp")
+        v = cartesian_6dof.solve_ik(self.configuration, [], limits=[], dt=1e-3, solver="daqp")
         np.testing.assert_allclose(v, np.zeros((self.model.nv,)))
 
     def test_single_task_fulfilled(self):
         """Velocity is zero when the only task is already fulfilled."""
-        task = mink.FrameTask(
+        task = cartesian_6dof.FrameTask(
             "attachment_site",
             "site",
             position_cost=1.0,
@@ -87,30 +87,30 @@ class TestSolveIK(absltest.TestCase):
         task.set_target(
             self.configuration.get_transform_frame_to_world("attachment_site", "site")
         )
-        v = mink.solve_ik(
+        v = cartesian_6dof.solve_ik(
             self.configuration, [task], limits=self.limits, dt=1e-3, solver="daqp"
         )
         np.testing.assert_allclose(v, np.zeros((self.model.nv,)), atol=1e-10)
 
     def test_single_task_convergence(self):
         """Integrating velocities makes a task converge to its target."""
-        configuration = mink.Configuration(self.model)
+        configuration = cartesian_6dof.Configuration(self.model)
         configuration.update_from_keyframe("home")
 
-        task = mink.FrameTask(
+        task = cartesian_6dof.FrameTask(
             "attachment_site", "site", position_cost=1.0, orientation_cost=1.0
         )
         transform_init_to_world = configuration.get_transform_frame_to_world(
             "attachment_site",
             "site",
         )
-        transform_target_to_init = mink.SE3.from_translation(np.array([0, 0, 0.1]))
+        transform_target_to_init = cartesian_6dof.SE3.from_translation(np.array([0, 0, 0.1]))
         transform_target_to_world = transform_init_to_world @ transform_target_to_init
         task.set_target(transform_target_to_world)
 
         dt = 5e-3  # [s]
         velocity_tol = 1e-4  # [m/s]
-        velocity = mink.solve_ik(
+        velocity = cartesian_6dof.solve_ik(
             configuration, [task], limits=self.limits, dt=dt, solver="daqp"
         )
 
@@ -133,7 +133,7 @@ class TestSolveIK(absltest.TestCase):
             self.assertLess(error, last_error)  # Error stictly decreases.
             last_error = error
             configuration.integrate_inplace(velocity, dt)
-            velocity = mink.solve_ik(
+            velocity = cartesian_6dof.solve_ik(
                 configuration, [task], limits=self.limits, dt=dt, solver="daqp"
             )
 
@@ -152,10 +152,10 @@ class TestSolveIK(absltest.TestCase):
     def test_no_solution_found_throws(self):
         """When the QP solver fails to find a solution, an exception is raised."""
         # Ask the end-effector to move to a far away target with a very large cost.
-        task = mink.FrameTask("attachment_site", "site", 1e6, 0)
-        task.set_target(mink.SE3.from_translation(np.array([100.0, 0, 0])))
-        with self.assertRaises(mink.NoSolutionFound) as cm:
-            mink.solve_ik(self.configuration, [task], dt=1e-3, solver="daqp")
+        task = cartesian_6dof.FrameTask("attachment_site", "site", 1e6, 0)
+        task.set_target(cartesian_6dof.SE3.from_translation(np.array([100.0, 0, 0])))
+        with self.assertRaises(cartesian_6dof.NoSolutionFound) as cm:
+            cartesian_6dof.solve_ik(self.configuration, [task], dt=1e-3, solver="daqp")
         self.assertEqual(str(cm.exception), "QP solver daqp failed to find a solution.")
 
 

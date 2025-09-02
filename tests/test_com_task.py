@@ -4,9 +4,9 @@ import numpy as np
 from absl.testing import absltest
 from robot_descriptions.loaders.mujoco import load_robot_description
 
-from mink import Configuration
-from mink.exceptions import InvalidTarget, TargetNotSet, TaskDefinitionError
-from mink.tasks import ComTask
+from cartesian_6dof import Configuration
+from cartesian_6dof.exceptions import InvalidTarget, TargetNotSet, TaskDefinitionError
+from cartesian_6dof.tasks import ComTask
 
 
 class TestComTask(absltest.TestCase):

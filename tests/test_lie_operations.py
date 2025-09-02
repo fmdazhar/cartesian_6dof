@@ -6,10 +6,10 @@ import mujoco
 import numpy as np
 from absl.testing import absltest, parameterized
 
-from mink.exceptions import InvalidMocapBody
-from mink.lie.base import MatrixLieGroup
-from mink.lie.se3 import SE3
-from mink.lie.so3 import SO3
+from cartesian_6dof.exceptions import InvalidMocapBody
+from cartesian_6dof.lie.base import MatrixLieGroup
+from cartesian_6dof.lie.se3 import SE3
+from cartesian_6dof.lie.so3 import SO3
 
 from .utils import assert_transforms_close
 

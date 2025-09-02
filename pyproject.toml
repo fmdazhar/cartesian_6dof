@@ -3,7 +3,7 @@ requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "mink"
+name = "cartesian_6dof"
 version = "0.0.11"
 readme = "README.md"
 authors = [
@@ -56,15 +56,10 @@ all = [
     "mink[examples,dev]",
 ]
 
-[project.urls]
-Source = "https://github.com/kevinzakka/mink"
-Tracker = "https://github.com/kevinzakka/mink/issues"
-Changelog = "https://github.com/kevinzakka/mink/blob/main/CHANGELOG.md"
-Homepage = "https://kevinzakka.github.io/mink/"
-Documentation = "https://kevinzakka.github.io/mink/"
+
 
 [tool.flit.module]
-name = "mink"
+name = "cartesian_6dof"
 
 [tool.ruff]
 lint.select = [

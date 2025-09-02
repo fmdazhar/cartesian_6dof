@@ -1,13 +1,14 @@
-from pathlib import Path
+#arm_ur5e_gripper_pick_place.py
 
+from pathlib import Path
 import mujoco
 import mujoco.viewer
 import numpy as np
 from loop_rate_limiters import RateLimiter
 from collections import deque
 import time
-
-import mink
+import cartesian_6dof
+from cartesian_6dof.gripper import Gripper, GripperConfig, OPEN, CLOSE
 
 
 _HERE = Path(__file__).parent
@@ -17,29 +18,31 @@ _XML = _HERE / "universal_robots_ur5e" / "scene_pick_place.xml"
 if __name__ == "__main__":
     model = mujoco.MjModel.from_xml_path(_XML.as_posix())
     data = mujoco.MjData(model)
+    gripper = Gripper(model, data, GripperConfig(ctrl_index=6, open_value=OPEN, close_value=CLOSE))
+
 
     ## =================== ##
     ## Setup IK.
     ## =================== ##
 
-    configuration = mink.Configuration(model)
+    configuration = cartesian_6dof.Configuration(model)
 
     tasks = [
-        end_effector_task := mink.FrameTask(
+        end_effector_task := cartesian_6dof.FrameTask(
             frame_name="pinch",
             frame_type="site",
             position_cost=1.0,
             orientation_cost=1.0,
             lm_damping=1e-6,
         ),
-        posture_task := mink.PostureTask(model, cost=1e-3),
+        posture_task := cartesian_6dof.PostureTask(model, cost=1e-3),
     ]
 
     collision_pairs = []
 
     limits = [
-        mink.ConfigurationLimit(model=configuration.model),
-        mink.CollisionAvoidanceLimit(
+        cartesian_6dof.ConfigurationLimit(model=configuration.model),
+        cartesian_6dof.CollisionAvoidanceLimit(
             model=configuration.model,
             geom_pairs=collision_pairs,
         ),
@@ -53,7 +56,7 @@ if __name__ == "__main__":
         "wrist_2": 0.1,
         "wrist_3": 0.1,
     }
-    velocity_limit = mink.VelocityLimit(model, max_velocities)
+    velocity_limit = cartesian_6dof.VelocityLimit(model, max_velocities)
     limits.append(velocity_limit)
 
     ## =================== ##
@@ -64,8 +67,8 @@ if __name__ == "__main__":
     ori_threshold = 1e-4
     max_iters = 20
 
-    path_queue: deque[list[mink.SE3]] = deque()
-    active_path: list[mink.SE3] | None = None
+    path_queue: deque[list[cartesian_6dof.SE3]] = deque()
+    active_path: list[cartesian_6dof.SE3] | None = None
     
     path_idx: int = 0
     next_goal_idx: int = 0
@@ -75,7 +78,7 @@ if __name__ == "__main__":
     last_goal_T = None            # mink.SE3 of the EE
 
     # Polynomial trajectory generator
-    interpolator = mink.PolynomialInterpolator(order=5)
+    interpolator = cartesian_6dof.PolynomialInterpolator(order=1)
 
     with mujoco.viewer.launch_passive(
         model=model,
@@ -97,27 +100,17 @@ if __name__ == "__main__":
         APPROACH_Z   = 0.05
         LIFT_Z       = TABLE_Z + 0.15
         PLACE_XY     = (0.30, -0.20)    # where we drop the cube
-        OPEN  = -255.0     # joints [rad]; adjust to match your XML
-        CLOSE = 255.0
         FACE_DOWN = [0.0, 1.0, 0.0, 0.0]
 
         plan = [
-            # ---- approach above cube ----
-            ([0.51, 0.00, APPROACH_Z], FACE_DOWN, OPEN, 200),
-            # ---- descend to grasp pose ----
-            ([0.51, 0.00, TABLE_Z+0.01], FACE_DOWN, OPEN, 200),
-            # ---- close gripper (attach happens automatically) ----
-            ([0.51, 0.00, TABLE_Z+0.01], FACE_DOWN, CLOSE, 200),
-
-            # ---- lift straight up ----
-            ([0.51, 0.00, LIFT_Z], FACE_DOWN, CLOSE, 200),
-            # ---- transfer above place pose ----
-            ([*PLACE_XY, LIFT_Z],       FACE_DOWN, CLOSE, 200),
-            # ---- descend & open ----
-            ([*PLACE_XY, TABLE_Z+0.012], FACE_DOWN, CLOSE, 200),
-            ([*PLACE_XY, TABLE_Z+0.012], FACE_DOWN, OPEN, 200),
-            # ---- retreat ----
-            ([*PLACE_XY, LIFT_Z],   FACE_DOWN, OPEN, 0),
+        ([0.5, 0.00, APPROACH_Z],     FACE_DOWN, OPEN,  200),
+        ([0.5, 0.00, TABLE_Z+0.01],   FACE_DOWN, OPEN,  200),
+        ([0.5, 0.00, TABLE_Z+0.01],   FACE_DOWN, CLOSE, 200),
+        ([0.5, 0.00, LIFT_Z],         FACE_DOWN, CLOSE, 200),
+        ([*PLACE_XY, LIFT_Z],         FACE_DOWN, CLOSE, 200),
+        ([*PLACE_XY, TABLE_Z+0.012],  FACE_DOWN, CLOSE, 200),
+        ([*PLACE_XY, TABLE_Z+0.012],  FACE_DOWN, OPEN,  200),
+        ([*PLACE_XY, LIFT_Z],         FACE_DOWN, OPEN,  0),
         ]
 
         while viewer.is_running():
@@ -133,10 +126,10 @@ if __name__ == "__main__":
 
                 # Ready for a new segment once wait is over
                 if not wait_steps_remaining and active_path is None and next_goal_idx < len(plan):
-                    start_T = mink.SE3.from_frame_name(model, data, "pinch", frame_type="site")
+                    start_T = cartesian_6dof.SE3.from_frame_name(model, data, "pinch", frame_type="site")
                     spec = plan[next_goal_idx]
 
-                    goal = mink.SE3.resolve_goal(spec, start_T)
+                    goal = cartesian_6dof.SE3.resolve_goal(spec, start_T)
                     goal_T              = goal.pose
                     grip_cmd_current    = goal.gripper_cmd
                     wait_steps_current  = goal.wait_steps
@@ -156,11 +149,11 @@ if __name__ == "__main__":
 
             # ---------- gripper command ----------
             if grip_cmd_current is not None:
-                data.ctrl[6] = grip_cmd_current
+                gripper.set(grip_cmd_current)
 
             # Compute velocity and integrate into the next configuration.
             for i in range(max_iters):
-                vel = mink.solve_ik(
+                vel = cartesian_6dof.solve_ik(
                     configuration, tasks, rate.dt, solver, limits=limits
                 )
                 configuration.integrate_inplace(vel, rate.dt)

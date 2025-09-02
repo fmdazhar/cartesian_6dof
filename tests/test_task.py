@@ -2,8 +2,8 @@
 
 from absl.testing import absltest
 
-from mink.exceptions import InvalidDamping, InvalidGain
-from mink.tasks.task import Task
+from cartesian_6dof.exceptions import InvalidDamping, InvalidGain
+from cartesian_6dof.tasks.task import Task
 
 
 class TestTask(absltest.TestCase):

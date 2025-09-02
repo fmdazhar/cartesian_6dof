@@ -4,8 +4,8 @@ import numpy as np
 from absl.testing import absltest
 from robot_descriptions.loaders.mujoco import load_robot_description
 
-from mink import Configuration
-from mink.tasks import DampingTask
+from cartesian_6dof import Configuration
+from cartesian_6dof.tasks import DampingTask
 
 
 class TestDampingTask(absltest.TestCase):

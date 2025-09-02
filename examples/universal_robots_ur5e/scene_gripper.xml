@@ -5,7 +5,7 @@
 
   <visual>
     <headlight diffuse="0.6 0.6 0.6" ambient="0.1 0.1 0.1" specular="0 0 0"/>
-    <global azimuth="120" elevation="-20"/>
+    <global azimuth="120" elevation="-20" offwidth="1024" offheight="768"/>
   </visual>
 
   <asset>
@@ -20,12 +20,12 @@
     <body name="target" pos="0.5 0 .5" quat="0 1 0 0" mocap="true">
       <geom type="box" size=".05 .05 .05" contype="0" conaffinity="0" rgba=".6 .3 .3 .2"/>
     </body>
-    <body name="wall" pos="0.5 0 0.1">
-      <geom name="wall" type="box" size=".1 .1 .1"/>
+    <body name="wall" pos="0.5 0.1 0.1">
+      <geom name="wall" type="box" size=".1 .1 .1" friction="1 0.005 0.0001"/>
     </body>
   </worldbody>
 
-  <sensor>
+  <!-- <sensor>
     <fromto geom1="shoulder_col"  geom2="wall"  cutoff="1"/>
     <fromto geom1="upper_arm_col0" geom2="wall" cutoff="1"/>
     <fromto geom1="upper_arm_col1" geom2="wall" cutoff="1"/>
@@ -33,59 +33,17 @@
     <fromto geom1="forearm_col1"   geom2="wall" cutoff="1"/>
     <fromto geom1="wrist_1_col"    geom2="wall" cutoff="1"/>
     <fromto geom1="wrist_2_col"    geom2="wall" cutoff="1"/>
-    <fromto geom1="wrist_3_col"    geom2="wall" cutoff="1"/>
-    
-    <!-- 
-    <fromto geom1="shoulder_col"  geom2="floor" cutoff="1"/>
-    <fromto geom1="upper_arm_col0" geom2="floor" cutoff="1"/>
-    <fromto geom1="upper_arm_col1" geom2="floor" cutoff="1"/>
-    <fromto geom1="forearm_col0"   geom2="floor" cutoff="1"/>
-    <fromto geom1="forearm_col1"   geom2="floor" cutoff="1"/>
-    <fromto geom1="wrist_1_col"    geom2="floor" cutoff="1"/>
-    <fromto geom1="wrist_2_col"    geom2="floor" cutoff="1"/>
-    <fromto geom1="wrist_3_col"    geom2="floor" cutoff="1"/> -->
-
-    <fromto geom1="base_mount_col"   geom2="wall" cutoff="1"/>
-    <fromto geom1="base_gripper_col" geom2="wall" cutoff="1"/>
-    <fromto geom1="right_driver_col" geom2="wall" cutoff="1"/>
-    <fromto geom1="right_coupler_col" geom2="wall" cutoff="1"/>
-    <fromto geom1="right_spring_col" geom2="wall" cutoff="1"/>
-    <fromto geom1="right_follower_col"   geom2="wall" cutoff="1"/>
-
-    <fromto geom1="left_driver_col"  geom2="wall" cutoff="1"/>
-    <fromto geom1="left_coupler_col"     geom2="wall" cutoff="1"/>
-    <fromto geom1="left_spring_col"  geom2="wall" cutoff="1"/>
-    <fromto geom1="left_follower_col" geom2="wall" cutoff="1"/>
-   
-    <fromto geom1="left_pad1"        geom2="wall" cutoff="1"/>
-    <fromto geom1="left_pad2"        geom2="wall" cutoff="1"/> 
-    <fromto geom1="right_pad1"       geom2="wall" cutoff="1"/>
-    <fromto geom1="right_pad2"       geom2="wall" cutoff="1"/>
-
-<!-- 
-    <fromto geom1="base_mount_col"   geom2="floor" cutoff="1"/>
-    <fromto geom1="base_gripper_col" geom2="floor" cutoff="1"/>
-    <fromto geom1="right_driver_col" geom2="floor" cutoff="1"/>
-    <fromto geom1="right_coupler_col" geom2="floor" cutoff="1"/>
-    <fromto geom1="right_spring_col" geom2="floor" cutoff="1"/>
-    <fromto geom1="right_follower"   geom2="floor" cutoff="1"/>
-
-    <fromto geom1="left_driver_col"  geom2="floor" cutoff="1"/>
-    <fromto geom1="left_coupler"     geom2="floor" cutoff="1"/>
-    <fromto geom1="left_spring_col"  geom2="floor" cutoff="1"/>
-    <fromto geom1="left_follower_col" geom2="floor" cutoff="1"/>
-        -->
-
-    <!-- <fromto geom1="left_pad1"        geom2="floor" cutoff="1"/>
-    <fromto geom1="left_pad2"        geom2="floor" cutoff="1"/> 
-    <fromto geom1="right_pad1"       geom2="floor" cutoff="1"/>
-    <fromto geom1="right_pad2"       geom2="floor" cutoff="1"/> -->
+      
+    <fromto geom1="gripper_dist_box"    geom2="wall" cutoff="0.2"/>
+    <fromto geom1="right_pad_ell"    geom2="wall" cutoff="0.2"/>
+    <fromto geom1="left_pad_ell"     geom2="wall" cutoff="0.2"/>
 
 
-  </sensor>
+  </sensor> -->
 
   <keyframe>
-    <key name="home" qpos="-1.84904284 -1.59233013  1.320765   -1.30950633 -1.56826897 -0.50860732 0 0 0 0 0 0 0 0" ctrl="-1.5708 -1.5708 1.5708 -1.5708 -1.5708 0 0"/>
+    <!-- <key name="home" qpos="-1.5708 -1.5708 1.5708 -1.5708 -1.5708 0 0 0 0 0 0 0 0 0" ctrl="-1.5708 -1.5708 1.5708 -1.5708 -1.5708 0 0"/> -->
+    <key name="home" qpos="-2.20570036 -1.37522352  1.93687489 -2.07885842 -1.57079982 -0.63489964 0 0 0 0 0 0 0 0" ctrl="-2.20570036 -1.37522352  1.93687489 -2.07885842 -1.57079982 -0.63489964 0"/>
   </keyframe>
 
 </mujoco>

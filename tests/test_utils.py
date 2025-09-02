@@ -5,8 +5,8 @@ import numpy as np
 from absl.testing import absltest
 from robot_descriptions.loaders.mujoco import load_robot_description
 
-from mink import utils
-from mink.exceptions import InvalidKeyframe, InvalidMocapBody
+from cartesian_6dof import utils
+from cartesian_6dof.exceptions import InvalidKeyframe, InvalidMocapBody
 
 
 class TestUtils(absltest.TestCase):

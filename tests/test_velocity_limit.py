@@ -5,9 +5,9 @@ import numpy as np
 from absl.testing import absltest
 from robot_descriptions.loaders.mujoco import load_robot_description
 
-from mink import Configuration
-from mink.exceptions import LimitDefinitionError
-from mink.limits import VelocityLimit
+from cartesian_6dof import Configuration
+from cartesian_6dof.exceptions import LimitDefinitionError
+from cartesian_6dof.limits import VelocityLimit
 
 
 class TestVelocityLimit(absltest.TestCase):

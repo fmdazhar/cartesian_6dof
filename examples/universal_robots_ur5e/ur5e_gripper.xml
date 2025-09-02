@@ -51,14 +51,26 @@
       <default class="2f85/collision">
         <geom type="mesh" group="3"/>
         <default class="pad_box1">
-          <geom mass="0" type="box" pos="0 -0.0026 0.028125" size="0.011 0.004 0.009375" friction="0.7"
+          <geom mass="0" type="box" pos="0 -0.0026 0.028125" size="0.011 0.004 0.009375" friction="1.0 0.05 0.05"
             solimp="0.95 0.99 0.001" solref="0.004 1" priority="1" rgba="0.55 0.55 0.55 1"/>
         </default>
         <default class="pad_box2">
-          <geom mass="0" type="box" pos="0 -0.0026 0.009375" size="0.011 0.004 0.009375" friction="0.6"
+          <geom mass="0" type="box" pos="0 -0.0026 0.009375" size="0.011 0.004 0.009375" friction="1.0 0.05 0.05"
             solimp="0.95 0.99 0.001" solref="0.004 1" priority="1" rgba="0.45 0.45 0.45 1"/>
         </default>
       </default>
+    </default>
+  </default>
+
+  <default>
+    <default class="dist_ellipsoid">
+      <!-- purely for distance queries / viz -->
+      <geom type="ellipsoid"
+            contype="0" conaffinity="0"
+            group="5"                
+            rgba="0 1 0 0.15"       
+            mass="0"               
+            priority="1"/>          
     </default>
   </default>
 
@@ -168,6 +180,10 @@
                         <geom class="2f85/visual" mesh="base" material="black"/>
                         <geom name="base_gripper_col" class="2f85/collision" mesh="base"/>
                         <site name="pinch" pos="0 0 0.145"/>
+                        <geom name="gripper_dist_box"
+                        class="dist_ellipsoid"
+                        pos="0 0 0.075"
+                        size="0.025 0.08 0.05"/>
                         <body name="right_driver" pos="0 0.0306011 0.054904">
                           <inertial mass="0.00899563" pos="2.96931e-12 0.0177547 0.00107314"
                             quat="0.681301 0.732003 0 0" diaginertia="1.72352e-06 1.60906e-06 3.22006e-07"/>
@@ -205,6 +221,10 @@
                               <body name="right_silicone_pad">
                                 <geom class="2f85/visual" mesh="silicone_pad" material="black"/>
                               </body>
+                              <geom name="right_pad_ell"
+                                    class="dist_ellipsoid"
+                                    pos="0 -0.0026 0.0185"
+                                    size="0.012 0.01 0.025"/>
                             </body>
                           </body>
                         </body>
@@ -245,6 +265,10 @@
                               <body name="left_silicone_pad">
                                 <geom class="2f85/visual" mesh="silicone_pad" material="black"/>
                               </body>
+                              <geom name="left_pad_ell"
+                              class="dist_ellipsoid"
+                              pos="0 -0.0026 0.0185"
+                              size="0.012 0.01 0.025"/>
                             </body>
                           </body>
                         </body>

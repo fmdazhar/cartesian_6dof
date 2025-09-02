@@ -3,7 +3,7 @@
 import numpy as np
 from absl.testing import absltest
 
-from mink.lie import utils
+from cartesian_6dof.lie import utils
 
 
 class TestUtils(absltest.TestCase):

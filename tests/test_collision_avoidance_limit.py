@@ -7,13 +7,13 @@ import numpy as np
 from absl.testing import absltest
 from robot_descriptions.loaders.mujoco import load_robot_description
 
-from mink import Configuration
-from mink.limits import CollisionAvoidanceLimit
-from mink.limits.collision_avoidance_limit import (
+from cartesian_6dof import Configuration
+from cartesian_6dof.limits import CollisionAvoidanceLimit
+from cartesian_6dof.limits.collision_avoidance_limit import (
     Contact,
     compute_contact_normal_jacobian,
 )
-from mink.utils import get_body_geom_ids
+from cartesian_6dof.utils import get_body_geom_ids
 
 
 class TestCollisionAvoidanceLimit(absltest.TestCase):

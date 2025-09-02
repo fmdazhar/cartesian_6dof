@@ -4,9 +4,9 @@ import numpy as np
 from absl.testing import absltest
 from robot_descriptions.loaders.mujoco import load_robot_description
 
-from mink import SE3, Configuration
-from mink.exceptions import TargetNotSet, TaskDefinitionError
-from mink.tasks import FrameTask, RelativeFrameTask
+from cartesian_6dof import SE3, Configuration
+from cartesian_6dof.exceptions import TargetNotSet, TaskDefinitionError
+from cartesian_6dof.tasks import FrameTask, RelativeFrameTask
 
 
 class TestRelativeFrameTask(absltest.TestCase):

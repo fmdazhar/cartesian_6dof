@@ -4,9 +4,9 @@ import mujoco
 import numpy as np
 from absl.testing import absltest
 
-from mink import Configuration
-from mink.exceptions import IntegrationTimestepNotSet, TaskDefinitionError
-from mink.tasks import KineticEnergyRegularizationTask
+from cartesian_6dof import Configuration
+from cartesian_6dof.exceptions import IntegrationTimestepNotSet, TaskDefinitionError
+from cartesian_6dof.tasks import KineticEnergyRegularizationTask
 
 
 class TestKineticEnergyRegularizationTask(absltest.TestCase):

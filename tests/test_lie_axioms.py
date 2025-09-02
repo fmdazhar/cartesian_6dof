@@ -4,8 +4,8 @@ from typing import Type
 
 from absl.testing import absltest, parameterized
 
-from mink import lie
-from mink.lie.base import MatrixLieGroup
+from cartesian_6dof import lie
+from cartesian_6dof.lie.base import MatrixLieGroup
 
 from .utils import assert_transforms_close
 
